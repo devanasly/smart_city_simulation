@@ -1,0 +1,30 @@
+{
+  "session_id": "session_1777148387",
+  "parameters": {
+    "infection_rate": 0.3,
+    "hospital_capacity": 50,
+    "fuel_rate": 0.05,
+    "traffic_density": 0.4,
+    "simulation_duration_years": 10,
+    "population": 20,
+    "mobility_factor": 0.8,
+    "birth_rate": 0.02,
+    "death_rate": 0.01
+  },
+  "simulation_duration_minutes": 1.0,
+  "time_series": [
+    {
+      "sim_time_minutes": 1.0,
+      "susceptible": 20,
+      "infected": 0,
+      "recovered": 0,
+      "hospital_occupancy": 0,
+      "hospital_rejected": 0,
+      "gas_queue_length": 0,
+      "gas_avg_wait": 0.0,
+      "traffic_congestion": 0.079,
+      "traffic_avg_delay": 2.36,
+      "total_population": 20
+    }
+  ]
+}

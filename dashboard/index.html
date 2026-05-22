@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart City Simulation - لوحة التحكم</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== رأس الصفحة ===== -->
+  <header class="header">
+    <div class="header-inner">
+      <h1 class="header-title">نظام محاكاة المدينة الذكية</h1>
+      <span class="header-subtitle">Smart City Simulation Dashboard</span>
+      <div class="header-meta-row">
+        <!-- <span class="header-label">الجلسة:</span>
+        <span id="sessionId" class="header-value">-</span>
+        <span class="header-sep">|</span>
+        <span class="header-label">الزمن:</span>
+        <span id="simTime" class="header-value">-</span> -->
+         <span class="header-label">Anas Emad</span>
+        <span id="simTime" class="header-value">-</span> 
+        <span class="header-sep">|</span>
+        <div class="status-badge" id="statusBadge">غير متصل</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-grid">
+
+    <!-- ===== لوحة الإعدادات ===== -->
+    <aside class="config-panel card">
+      <h2 class="card-title">إعدادات المحاكاة</h2>
+
+      <!-- معدل العدوى: 0.01 - 1.0 -->
+      <div class="form-group">
+        <label for="infectionRate">معدل العدوى <span class="field-hint">(0.01 - 1.0)</span></label>
+        <input type="number" id="infectionRate" class="num-input"
+               min="0.01" max="1.0" step="0.01" value="0.3"
+               placeholder="0.3" />
+      </div>
+
+      <!-- طاقة المستشفى: 10 - 2000 -->
+      <div class="form-group">
+        <label for="hospitalCapacity">طاقة المستشفى <span class="field-hint">(10 - 2000)</span></label>
+        <input type="number" id="hospitalCapacity" class="num-input"
+               min="10" max="2000" step="5" value="50"
+               placeholder="50" />
+      </div>
+
+      <!-- معدل استهلاك الوقود: 0.01 - 1.0 -->
+      <div class="form-group">
+        <label for="fuelRate">معدل استهلاك الوقود <span class="field-hint">(0.01 - 1.0)</span></label>
+        <input type="number" id="fuelRate" class="num-input"
+               min="0.01" max="1.0" step="0.01" value="0.18"
+               placeholder="0.18" />
+      </div>
+
+      <!-- كثافة المرور: 0.1 - 1.0 -->
+      <div class="form-group">
+        <label for="trafficDensity">كثافة المرور <span class="field-hint">(0.1 - 1.0)</span></label>
+        <input type="number" id="trafficDensity" class="num-input"
+               min="0.1" max="1.0" step="0.05" value="0.85"
+               placeholder="0.85" />
+      </div>
+
+      <!-- عدد السكان: 10 - 10000 -->
+      <div class="form-group">
+        <label for="population">عدد السكان <span class="field-hint">(10 - 10000)</span></label>
+        <input type="number" id="population" class="num-input"
+               min="10" max="10000" step="10" value="200"
+               placeholder="200" />
+      </div>
+
+      <!-- معامل الحركة: 0.1 - 1.0 -->
+      <div class="form-group">
+        <label for="mobilityFactor">معامل الحركة <span class="field-hint">(0.1 - 1.0)</span></label>
+        <input type="number" id="mobilityFactor" class="num-input"
+               min="0.1" max="1.0" step="0.05" value="0.8"
+               placeholder="0.8" />
+      </div>
+
+      <!-- مدة المحاكاة: 1 - 500 سنة -->
+      <div class="form-group">
+        <label for="simDuration">مدة المحاكاة (سنوات) <span class="field-hint">(1 - 500)</span></label>
+        <input type="number" id="simDuration" class="num-input"
+               min="1" max="500" step="1" value="10"
+               placeholder="10" />
+      </div>
+
+      <div class="form-group">
+        <label for="speedFactor">مضاعف السرعة</label>
+        <select id="speedFactor" class="config-select">
+          <option value="1">x1 - عادي</option>
+          <option value="2">x2 - متوسط</option>
+          <option value="5">x5 - سريع</option>
+          <option value="10" selected>x10 - أقصى سرعة</option>
+        </select>
+      </div>
+
+      <button class="btn btn-start" onclick="startSimulation()">تطبيق الإعدادات</button>
+      <div class="config-status" id="configStatus"></div>
+    </aside>
+
+    <!-- ===== منطقة الرسوم البيانية ===== -->
+    <section class="charts-area">
+
+      <!-- بطاقات المقاييس الحية -->
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="metric-value" id="mPop">-</div>
+          <div class="metric-label">إجمالي السكان</div>
+        </div>
+        <div class="metric-card births-card">
+          <div class="metric-value" id="mBirths">-</div>
+          <div class="metric-label">المولودون</div>
+        </div>
+        <div class="metric-card deaths-card">
+          <div class="metric-value" id="mDeaths">-</div>
+          <div class="metric-label">المتوفون</div>
+        </div>
+        <div class="metric-card infected-card">
+          <div class="metric-value" id="mInf">-</div>
+          <div class="metric-label">المصابون</div>
+        </div>
+        <div class="metric-card recovered-card">
+          <div class="metric-value" id="mRec">-</div>
+          <div class="metric-label">المتعافون</div>
+        </div>
+        <div class="metric-card hospital-card">
+          <div class="metric-value" id="mHosp">-</div>
+          <div class="metric-label">إشغال المستشفى</div>
+        </div>
+        <div class="metric-card gas-card">
+          <div class="metric-value" id="mGas">-</div>
+          <div class="metric-label">طابور الوقود</div>
+        </div>
+        <div class="metric-card traffic-card">
+          <div class="metric-value" id="mTraffic">-</div>
+          <div class="metric-label">الازدحام</div>
+        </div>
+      </div>
+
+      <!-- الرسوم البيانية الحية -->
+      <div class="charts-grid">
+
+        <div class="chart-card chart-wide">
+          <h3 class="chart-title">تطور الوباء (SIR)</h3>
+          <canvas id="chartSIR"></canvas>
+          <div class="range-status-bar" id="chartSIR_rangeStatus">انقر على نقطة البداية لبدء تحليل النطاق الزمني</div>
+          <div class="range-actions">
+            <button class="btn-range-clear" onclick="clearRange('chartSIR')">مسح النطاق</button>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3 class="chart-title">تطور السكان</h3>
+          <canvas id="chartPop"></canvas>
+          <div class="range-status-bar" id="chartPop_rangeStatus">انقر على نقطة البداية لبدء تحليل النطاق الزمني</div>
+          <div class="range-actions">
+            <button class="btn-range-clear" onclick="clearRange('chartPop')">مسح النطاق</button>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3 class="chart-title">التطور الديموغرافي (مواليد / وفيات)</h3>
+          <canvas id="chartDemography"></canvas>
+          <div class="range-status-bar" id="chartDemography_rangeStatus">انقر على نقطة البداية لبدء تحليل النطاق الزمني</div>
+          <div class="range-actions">
+            <button class="btn-range-clear" onclick="clearRange('chartDemography')">مسح النطاق</button>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3 class="chart-title">إشغال المستشفى</h3>
+          <canvas id="chartHosp"></canvas>
+          <div class="range-status-bar" id="chartHosp_rangeStatus">انقر على نقطة البداية لبدء تحليل النطاق الزمني</div>
+          <div class="range-actions">
+            <button class="btn-range-clear" onclick="clearRange('chartHosp')">مسح النطاق</button>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3 class="chart-title">طابور محطة الوقود</h3>
+          <canvas id="chartGas"></canvas>
+          <div class="range-status-bar" id="chartGas_rangeStatus">انقر على نقطة البداية لبدء تحليل النطاق الزمني</div>
+          <div class="range-actions">
+            <button class="btn-range-clear" onclick="clearRange('chartGas')">مسح النطاق</button>
+          </div>
+        </div>
+
+        <div class="chart-card chart-wide">
+          <h3 class="chart-title">مستوى ازدحام المرور (%)</h3>
+          <canvas id="chartTraffic"></canvas>
+          <div class="range-status-bar" id="chartTraffic_rangeStatus">انقر على نقطة البداية لبدء تحليل النطاق الزمني</div>
+          <div class="range-actions">
+            <button class="btn-range-clear" onclick="clearRange('chartTraffic')">مسح النطاق</button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ===================================================
+       قسم مقارنة الجلسات المتكامل
+  =================================================== -->
+  <section class="sessions-section card">
+    <h2 class="card-title">مقارنة الجلسات</h2>
+    <p class="section-desc">اختر جلستين من الجلسات المحفوظة وحدّد المقياس لمقارنتهما. انقر على أي نقطة لعرض تفاصيلها الإحصائية.</p>
+
+    <!-- أدوات التحكم -->
+    <div class="compare-controls">
+
+      <div class="compare-control-group">
+        <label class="compare-label" for="selectSessionA">الجلسة A</label>
+        <select id="selectSessionA" class="compare-select" onchange="onSessionAChange()">
+          <option value="">-- اختر الجلسة A --</option>
+        </select>
+      </div>
+
+      <div class="compare-vs-badge">VS</div>
+
+      <div class="compare-control-group">
+        <label class="compare-label" for="selectSessionB">الجلسة B</label>
+        <select id="selectSessionB" class="compare-select" onchange="onSessionBChange()">
+          <option value="">-- اختر الجلسة B --</option>
+        </select>
+      </div>
+
+      <div class="compare-control-group">
+        <label class="compare-label" for="selectMetric">المقياس</label>
+        <select id="selectMetric" class="compare-select" onchange="onMetricChange()">
+          <option value="infected">المصابون</option>
+          <option value="recovered">المتعافون</option>
+          <option value="susceptible">غير المصابين</option>
+          <option value="total_population">إجمالي السكان</option>
+          <option value="total_births">إجمالي المواليد</option>
+          <option value="total_deaths">إجمالي الوفيات</option>
+          <option value="hospital_occupancy">إشغال المستشفى</option>
+          <option value="hospital_rejected">الحالات المرفوضة</option>
+          <option value="gas_queue_length">طابور الوقود</option>
+          <option value="gas_avg_wait">متوسط وقت الانتظار</option>
+          <option value="traffic_congestion">ازدحام المرور (%)</option>
+          <option value="traffic_avg_delay">متوسط تأخير المرور</option>
+          <option value="epidemic_deaths">وفيات الوباء</option>
+          <option value="effective_birth_rate">معدل المواليد الفعلي</option>
+        </select>
+      </div>
+
+      <button class="btn btn-secondary" onclick="loadSessionsList()">تحديث القائمة</button>
+
+    </div>
+
+    <!-- مؤشر التحميل -->
+    <div id="compareLoading" class="compare-loading" style="display:none;">
+      <div class="loading-spinner"></div>
+      <span>جاري تحميل بيانات الجلسة...</span>
+    </div>
+
+    <!-- الحالة الفارغة -->
+    <div id="compareEmptyState" class="compare-empty" style="display:flex;">
+      <p>اختر جلستين من القوائم أعلاه لبدء المقارنة</p>
+    </div>
+
+    <!-- رسم المقارنة -->
+    <div id="compareChartContainer" class="chart-card" style="display:none; margin-top:1.5rem;">
+      <h3 class="chart-title" id="compareChartTitle">مقارنة</h3>
+      <canvas id="chartCompare" style="max-height:380px;"></canvas>
+      <div class="range-status-bar" id="chartCompare_rangeStatus">انقر على نقطة البداية لبدء تحليل النطاق الزمني</div>
+      <div class="range-actions">
+        <button class="btn-range-clear" onclick="clearRange('chartCompare')">مسح النطاق</button>
+      </div>
+    </div>
+
+    <!-- الجلسات المحفوظة (قائمة نصية) -->
+    <div class="sessions-controls" style="margin-top:1.5rem;">
+      <button class="btn btn-secondary" onclick="loadSessions()">تحديث قائمة الجلسات</button>
+    </div>
+    <div id="sessionsContainer" class="sessions-grid"></div>
+
+  </section>
+
+  <!-- ============================================================
+       لوحة التنبؤ بالذكاء الاصطناعي المحلي (AI Prediction Panel)
+       ============================================================ -->
+  <section class="sessions-section card" id="predictionSection" style="margin-top:2rem;">
+    <h2 class="card-title">لوحة التنبؤ بالذكاء الاصطناعي المحلي</h2>
+    <p class="section-desc">يستخدم هذا النظام خوارزميات إحصائية لتوقع القيم المستقبلية</p>
+
+    <!-- أدوات التحكم -->
+    <div class="prediction-controls">
+
+      <!-- تفعيل / تعطيل -->
+      <div class="prediction-control-group">
+        <label class="prediction-label">حالة النظام</label>
+        <label class="prediction-toggle">
+          <input type="checkbox" id="predictionEnabled" onchange="onPredictionToggle()" />
+          <span>تفعيل التنبؤ</span>
+        </label>
+      </div>
+
+      <!-- اختيار المقياس -->
+      <div class="prediction-control-group">
+        <label class="prediction-label" for="predMetric">المقياس</label>
+        <select id="predMetric" class="prediction-select" disabled>
+          <option value="infected">المصابون</option>
+          <option value="recovered">المتعافون</option>
+          <option value="total_deaths">إجمالي الوفيات</option>
+          <option value="total_births">إجمالي المواليد</option>
+          <option value="total_population">إجمالي السكان</option>
+          <option value="hospital_occupancy">إشغال المستشفى</option>
+          <option value="gas_queue_length">طابور الوقود</option>
+          <option value="traffic_congestion">ازدحام المرور</option>
+        </select>
+      </div>
+
+      <!-- اختيار وضع التنبؤ -->
+      <div class="prediction-control-group">
+        <label class="prediction-label" for="predMode">وضع التنبؤ</label>
+        <select id="predMode" class="prediction-select" disabled>
+          <option value="linear_regression">الانحدار الخطي</option>
+          <option value="moving_average">المتوسط المتحرك</option>
+          <option value="exponential_smoothing">التمهيد الأسي</option>
+        </select>
+      </div>
+
+      <!-- اختيار الأفق الزمني -->
+      <div class="prediction-control-group">
+        <label class="prediction-label" for="predHorizon">الأفق الزمني</label>
+        <select id="predHorizon" class="prediction-select" onchange="onHorizonChange()" disabled>
+          <option value="30">30 دقيقة</option>
+          <option value="60" selected>60 دقيقة</option>
+          <option value="120">120 دقيقة</option>
+          <option value="custom">مخصص...</option>
+        </select>
+      </div>
+
+      <!-- أفق مخصص -->
+      <div class="prediction-control-group" id="customHorizonGroup" style="display:none;">
+        <label class="prediction-label" for="predCustomHorizon">أفق مخصص (دقائق)</label>
+        <input type="number" id="predCustomHorizon" class="prediction-input"
+               min="5" max="500" step="5" value="90" placeholder="90" disabled />
+      </div>
+
+      <!-- زر التوليد -->
+      <div class="prediction-control-group">
+        <label class="prediction-label">&nbsp;</label>
+        <button class="btn btn-primary" id="btnGeneratePrediction" onclick="generatePrediction()" disabled>
+          توليد التنبؤ
+        </button>
+      </div>
+
+    </div>
+
+    <!-- مؤشر التحميل -->
+    <div id="predictionLoading" class="prediction-loading" style="display:none;">
+      <div class="loading-spinner"></div>
+      <span>جاري توليد التنبؤ...</span>
+    </div>
+
+    <!-- حاوية الرسم البياني -->
+    <div id="predictionChartContainer" class="chart-card" style="display:none; margin-top:1rem;">
+      <h3 class="chart-title" id="predictionChartTitle">التنبؤ</h3>
+      <div class="prediction-chart-container">
+        <canvas id="chartPrediction"></canvas>
+      </div>
+    </div>
+
+    <!-- صندوق الشرح بالعربية -->
+    <div id="predictionExplanation" class="prediction-explanation" style="display:none;">
+      <!-- يُملأ ديناميكياً -->
+    </div>
+
+  </section>
+
+  <footer class="footer">
+    <p>Smart City Simulation System &mdash; نظام محاكاة المدينة الذكية &mdash; يتجدد تلقائياً كل ثانيتين</p>
+  </footer>
+
+  <script src="dashboard.js"></script>
+
+<!-- ============================================================
+     نافذة تفاصيل تحليل النطاق الزمني (Modal)
+     ============================================================ -->
+<div id="rangeDetailModal" class="rd-modal-overlay" onclick="closeRangeDetailModal(event)">
+  <div class="rd-modal" role="dialog" aria-modal="true" aria-labelledby="rdModalTitle">
+    <!-- رأس النافذة -->
+    <div class="rd-modal-header">
+      <div class="rd-modal-title-group">
+        <div class="rd-modal-icon">&#9741;</div>
+        <div>
+          <h2 class="rd-modal-title" id="rdModalTitle">تحليل النطاق الزمني</h2>
+          <p class="rd-modal-subtitle" id="rdModalSubtitle">تفاصيل الفترة المحددة</p>
+        </div>
+      </div>
+      <button class="rd-modal-close" onclick="closeRangeDetailModal()" title="إغلاق">&#x2715;</button>
+    </div>
+    <!-- شريط معلومات النطاق -->
+    <div class="rd-range-bar" id="rdRangeBar">
+      <span class="rd-range-badge" id="rdRangeBadge">النطاق</span>
+      <span class="rd-range-info" id="rdRangeInfo">من — إلى —</span>
+    </div>
+    <!-- محتوى النافذة -->
+    <div class="rd-modal-body" id="rdModalBody">
+      <!-- يُملأ ديناميكياً بواسطة JavaScript -->
+    </div>
+    <!-- تذييل النافذة -->
+    <div class="rd-modal-footer">
+      <span class="rd-footer-hint" id="rdFooterHint">البيانات محسوبة من النطاق المحدد فقط</span>
+      <div class="rd-footer-actions">
+        <button class="rd-btn rd-btn-secondary" onclick="closeRangeDetailModal()">إغلاق</button>
+        <button class="rd-btn rd-btn-danger" id="rdClearBtn" onclick="">مسح النطاق</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

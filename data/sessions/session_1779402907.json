@@ -1,0 +1,45 @@
+{
+  "session_id": "session_1779402907",
+  "parameters": {
+    "infection_rate": 0.3,
+    "hospital_capacity": 50,
+    "fuel_rate": 0.05,
+    "traffic_density": 0.4,
+    "simulation_duration_years": 10,
+    "population": 99,
+    "mobility_factor": 0.8,
+    "birth_rate": 0.02,
+    "death_rate": 0.01
+  },
+  "simulation_duration_minutes": 1.45,
+  "time_series": [
+    {
+      "sim_time_minutes": 1.01,
+      "susceptible": 97,
+      "infected": 2,
+      "recovered": 0,
+      "hospital_occupancy": 0,
+      "hospital_rejected": 0,
+      "gas_queue_length": 0,
+      "gas_avg_wait": 0.0,
+      "traffic_congestion": 0.377,
+      "traffic_avg_delay": 25.6,
+      "total_population": 99,
+      "traffic_density_live": 0.469,
+      "traffic_peak_hour": 0,
+      "traffic_flow_rate": 0.0,
+      "traffic_moving_count": 29,
+      "traffic_label": "Moderate",
+      "gas_total_served": 0,
+      "gas_congestion_contribution": 0.0,
+      "hospital_queue": 0,
+      "hospital_queue_len": 0,
+      "effective_birth_rate": 2.0,
+      "epidemic_suppression": 0.0,
+      "total_births": 0,
+      "total_deaths": 0,
+      "epidemic_deaths": 0,
+      "total_infections": 0
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "session_id": "session_1779402910",
+  "parameters": {
+    "infection_rate": 0.3,
+    "hospital_capacity": 50,
+    "fuel_rate": 0.05,
+    "traffic_density": 0.4,
+    "simulation_duration_years": 10,
+    "population": 99,
+    "mobility_factor": 0.8,
+    "birth_rate": 0.02,
+    "death_rate": 0.01
+  },
+  "simulation_duration_minutes": 0.94,
+  "time_series": []
+}

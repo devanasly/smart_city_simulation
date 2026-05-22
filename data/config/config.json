@@ -1,0 +1,13 @@
+{
+  "apply": false,
+  "infection_rate": 1,
+  "hospital_capacity": 100,
+  "fuel_rate": 0.7,
+  "traffic_density": 1,
+  "population": 2000,
+  "mobility_factor": 0.9,
+  "simulation_duration_years": 1,
+  "speed_factor": 1,
+  "birth_rate": 0.02,
+  "death_rate": 0.01
+}
